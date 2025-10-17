@@ -1,4 +1,0 @@
-# this is the orders topic
-base_view: prod__orders
-
-joins: {}
