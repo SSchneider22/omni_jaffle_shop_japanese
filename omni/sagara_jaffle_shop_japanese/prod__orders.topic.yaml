@@ -1,0 +1,5 @@
+base_view: prod__orders
+label: 注文情報と顧客情報
+
+joins:
+  prod__customers: {}
