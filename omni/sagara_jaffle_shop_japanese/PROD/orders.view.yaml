@@ -46,6 +46,19 @@ dimensions:
     sql: '"ORDERED_AT"'
     #This description was pulled from dbt.
     description: 注文が行われたタイムスタンプ
+    timeframes:
+      [
+        raw,
+        date,
+        week,
+        month,
+        quarter,
+        year,
+        day_of_week_name,
+        hour_of_day,
+        month_name,
+        day_of_week_num
+      ]
 
   order_cost:
     sql: '"ORDER_COST"'
