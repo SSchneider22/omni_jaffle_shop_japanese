@@ -1,0 +1,31 @@
+# Reference this view as prod__orders
+dimensions:
+  ordered_at:
+    timeframes:
+      [
+        raw,
+        date,
+        week,
+        month,
+        quarter,
+        year,
+        day_of_week_name,
+        hour_of_day,
+        month_name,
+        day_of_week_num
+      ]
+
+measures:
+  order_total_sum:
+    sql: ${prod__orders.order_total}
+    aggregate_type: sum
+
+  orders_count_new_customer:
+    sql: |-
+      COUNT(
+        CASE
+          WHEN customer_order_number = 1 THEN 1
+          ELSE 0
+        END
+      )
+    label: Orders Count New Customer
