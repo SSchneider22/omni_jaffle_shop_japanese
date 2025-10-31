@@ -1,5 +1,5 @@
-base_view: mart__orders
+base_view: omni_dbt_mart__orders
 label: 注文情報と顧客情報
 
 joins:
-  mart__customers: {}
+  omni_dbt_mart__customers: {}
