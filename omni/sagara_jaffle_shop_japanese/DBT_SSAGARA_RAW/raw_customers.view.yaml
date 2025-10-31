@@ -1,0 +1,24 @@
+# Reference this view as dbt_ssagara_raw__raw_customers
+schema: DBT_SSAGARA_RAW
+table_name: RAW_CUSTOMERS
+
+dimensions:
+  id:
+    sql: '"ID"'
+    format: ID
+    primary_key: true
+
+  name:
+    sql: '"NAME"'
+
+measures:
+  count:
+    aggregate_type: count
+
+#The info below was pulled from your dbt repository and is read-only.
+dbt:
+  name: raw_customers
+  target_schema: dbt_ssagara
+  config:
+    schema: raw
+    materialized: seed

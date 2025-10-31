@@ -1,0 +1,46 @@
+# Reference this view as omni_dbt_omni_dbt_push__product_total_sales
+schema_label: ""
+
+schema: omni_dbt_omni_dbt_push
+table_name: PRODUCT_TOTAL_SALES
+
+dimensions:
+  order_total_sum: {}
+  tax_paid_sum: {}
+  order_total_sum_without_tax_2: {}
+
+  product_id:
+    sql: '"PRODUCT_ID"'
+    format: ID
+
+  product_name:
+    sql: '"PRODUCT_NAME"'
+
+  product_price:
+    sql: '"PRODUCT_PRICE"'
+
+  supply_cost:
+    sql: '"SUPPLY_COST"'
+
+measures:
+  count:
+    aggregate_type: count
+
+#The info below was pulled from your dbt repository and is read-only.
+dbt:
+  name: product_total_sales
+  target_schema: PROD
+  config:
+    schema: omni_dbt_push
+    materialized: table
+  code: |-
+    SELECT "prod__order_items"."PRODUCT_ID",
+        "prod__order_items"."PRODUCT_NAME",
+        "prod__order_items"."PRODUCT_PRICE",
+        "prod__order_items"."SUPPLY_COST",
+        COALESCE(SUM("prod__orders"."ORDER_TOTAL"), 0) AS "order_total_sum",
+        COALESCE(SUM("prod__orders"."TAX_PAID"), 0) AS "tax_paid_sum",
+        COALESCE(SUM("prod__orders"."ORDER_TOTAL"), 0) - COALESCE(SUM("prod__orders"."TAX_PAID"), 0) AS "order_total_sum_without_tax_2"
+    FROM {{ref('orders')}} AS "prod__orders"
+        LEFT JOIN {{ref('order_items')}} AS "prod__order_items" ON "prod__orders"."ORDER_ID" = "prod__order_items"."ORDER_ID"
+    GROUP BY 1, 2, 3, 4

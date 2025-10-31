@@ -1,0 +1,45 @@
+# Reference this view as dbt_ssagara__metricflow_time_spine
+#This description was pulled from dbt.
+description: Canonical daily time spine for MetricFlow demos
+
+schema: DBT_SSAGARA
+table_name: METRICFLOW_TIME_SPINE
+
+dimensions:
+  date_day:
+    sql: '"DATE_DAY"'
+    #This description was pulled from dbt.
+    description: Calendar date at day grain
+
+measures:
+  count:
+    aggregate_type: count
+
+#The info below was pulled from your dbt repository and is read-only.
+dbt:
+  name: metricflow_time_spine
+  target_schema: dbt_ssagara
+  description: Canonical daily time spine for MetricFlow demos
+  config:
+    schema: mart
+    materialized: table
+  code: |-
+    -- metricflow_time_spine.sql
+    with
+
+    days as (
+
+        --for BQ adapters use "DATE('01/01/2000','mm/dd/yyyy')"
+        {{ dbt_date.get_base_dates(n_dateparts=365*10, datepart="day") }}
+
+    ),
+
+    cast_to_date as (
+
+        select cast(date_day as date) as date_day
+
+        from days
+
+    )
+
+    select * from cast_to_date

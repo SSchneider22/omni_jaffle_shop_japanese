@@ -1,0 +1,31 @@
+# Reference this view as dbt_ssagara_raw__raw_products
+schema: DBT_SSAGARA_RAW
+table_name: RAW_PRODUCTS
+
+dimensions:
+  sku:
+    sql: '"SKU"'
+
+  name:
+    sql: '"NAME"'
+
+  type:
+    sql: '"TYPE"'
+
+  price:
+    sql: '"PRICE"'
+
+  description:
+    sql: '"DESCRIPTION"'
+
+measures:
+  count:
+    aggregate_type: count
+
+#The info below was pulled from your dbt repository and is read-only.
+dbt:
+  name: raw_products
+  target_schema: dbt_ssagara
+  config:
+    schema: raw
+    materialized: seed
