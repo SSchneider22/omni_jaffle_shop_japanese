@@ -17,8 +17,8 @@ dimensions:
     sql: '"PRODUCT_ID"'
     format: ID
 
-  ordered_at:
-    sql: '"ORDERED_AT"'
+  purchased_at:
+    sql: '"PURCHASED_AT"'
 
   product_name:
     sql: '"PRODUCT_NAME"'

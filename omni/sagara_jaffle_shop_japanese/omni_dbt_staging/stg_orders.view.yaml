@@ -39,8 +39,8 @@ dimensions:
   order_total:
     sql: '"ORDER_TOTAL"'
 
-  ordered_at:
-    sql: '"ORDERED_AT"'
+  purchased_at:
+    sql: '"PURCHASED_AT"'
 
 measures:
   count:
