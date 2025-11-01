@@ -42,13 +42,10 @@ dimensions:
     #This description was pulled from dbt.
     description: 税込みの注文総額 (USD)
 
-  # ordered_at:
-  #   sql: '"ORDERED_AT"'
-  #   #This description was pulled from dbt.
-  #   description: 注文が行われたタイムスタンプ
-
-  purchased_at:
-    sql: '"PURCHASED_AT"'
+  ordered_at:
+    sql: '"ORDERED_AT"'
+    #This description was pulled from dbt.
+    description: 注文が行われたタイムスタンプ
 
   order_cost:
     sql: '"ORDER_COST"'
@@ -79,11 +76,6 @@ dimensions:
 
   customer_order_number:
     sql: '"CUSTOMER_ORDER_NUMBER"'
-
-  ordered_at:
-    sql: '"ORDERED_AT"'
-    #This description was pulled from dbt.
-    description: 注文が行われたタイムスタンプ
 
 measures:
   count:
