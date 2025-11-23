@@ -1,0 +1,44 @@
+# Reference this view as dbt_ssagara__orders_yearly
+schema: DBT_SSAGARA
+table_name: ORDERS_YEARLY
+
+dimensions:
+  order_year:
+    sql: '"ORDER_YEAR"'
+
+  total_revenue:
+    sql: '"TOTAL_REVENUE"'
+
+  total_cost:
+    sql: '"TOTAL_COST"'
+
+  total_subtotal:
+    sql: '"TOTAL_SUBTOTAL"'
+
+  total_tax:
+    sql: '"TOTAL_TAX"'
+
+  total_profit:
+    sql: '"TOTAL_PROFIT"'
+
+  total_orders:
+    sql: '"TOTAL_ORDERS"'
+
+  total_items_sold:
+    sql: '"TOTAL_ITEMS_SOLD"'
+
+  total_food_items:
+    sql: '"TOTAL_FOOD_ITEMS"'
+
+  total_drink_items:
+    sql: '"TOTAL_DRINK_ITEMS"'
+
+  count_orders_with_food:
+    sql: '"COUNT_ORDERS_WITH_FOOD"'
+
+  count_orders_with_drink:
+    sql: '"COUNT_ORDERS_WITH_DRINK"'
+
+measures:
+  count:
+    aggregate_type: count

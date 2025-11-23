@@ -1,0 +1,96 @@
+# Reference this view as omni_dbt_mart__orders_monthly
+schema_label: ""
+
+schema: omni_dbt_mart
+table_name: ORDERS_MONTHLY
+
+dimensions:
+  order_month:
+    sql: '"ORDER_MONTH"'
+
+  total_revenue:
+    sql: '"TOTAL_REVENUE"'
+
+  total_cost:
+    sql: '"TOTAL_COST"'
+
+  total_subtotal:
+    sql: '"TOTAL_SUBTOTAL"'
+
+  total_tax:
+    sql: '"TOTAL_TAX"'
+
+  total_profit:
+    sql: '"TOTAL_PROFIT"'
+
+  total_orders:
+    sql: '"TOTAL_ORDERS"'
+
+  total_items_sold:
+    sql: '"TOTAL_ITEMS_SOLD"'
+
+  total_food_items:
+    sql: '"TOTAL_FOOD_ITEMS"'
+
+  total_drink_items:
+    sql: '"TOTAL_DRINK_ITEMS"'
+
+  count_orders_with_food:
+    sql: '"COUNT_ORDERS_WITH_FOOD"'
+
+  count_orders_with_drink:
+    sql: '"COUNT_ORDERS_WITH_DRINK"'
+
+measures:
+  count:
+    aggregate_type: count
+
+#The info below was pulled from your dbt repository and is read-only.
+dbt:
+  name: orders_monthly
+  target_schema: PROD
+  config:
+    schema: mart
+    materialized: table
+  code: |-
+    with source_data as (
+
+        -- 元のモデルを参照します。
+        -- まだモデル化していない場合は、ここに元のクエリ全体を記述してください。
+        select * from {{ ref('orders') }}
+
+    ),
+
+    monthly_summary as (
+
+        select
+            -- 月単位に切り捨て (Snowflake/BigQuery/Postgres等で一般的)
+            date_trunc('month', purchased_at) as order_month,
+
+            -- 金額の集計
+            sum(order_total) as total_revenue,
+            sum(order_cost) as total_cost,
+            sum(order_items_subtotal) as total_subtotal,
+            sum(tax_paid) as total_tax,
+            
+            -- 利益（売上 - コスト）の計算
+            sum(order_total) - sum(order_cost) as total_profit,
+
+            -- 数量の集計
+            count(*) as total_orders, -- 注文回数
+            sum(count_order_items) as total_items_sold, -- 商品点数合計
+            sum(count_food_items) as total_food_items,
+            sum(count_drink_items) as total_drink_items,
+
+            -- フラグの集計（Trueのものをカウント）
+            sum(case when is_food_order then 1 else 0 end) as count_orders_with_food,
+            sum(case when is_drink_order then 1 else 0 end) as count_orders_with_drink
+
+        from source_data
+        
+        group by 1
+
+    )
+
+    select * from monthly_summary
+    order by order_month desc
