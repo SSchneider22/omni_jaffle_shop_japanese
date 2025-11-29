@@ -1,7 +1,7 @@
 # Reference this view as omni_dbt_mart__jaffle_shop_analysis__products
 # View is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
 schema_label: ""
-description: 商品マスタテーブル
+description: 販売されている商品の詳細情報を持つマスタテーブル
 
 schema: omni_dbt_mart
 folder: MART/jaffle_shop_analysis
@@ -14,14 +14,10 @@ dimensions:
     primary_key: true
 
   product_name:
-    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
     sql: '"PRODUCT_NAME"'
-    description: 商品名
 
   product_type:
-    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
     sql: '"PRODUCT_TYPE"'
-    description: 商品カテゴリ (jaffle, beverageなど)
 
   product_description:
     sql: '"PRODUCT_DESCRIPTION"'
@@ -35,15 +31,29 @@ dimensions:
   is_drink_item:
     sql: '"IS_DRINK_ITEM"'
 
-  is_drink:
+  dim_is_drink:
     # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
     sql: ${omni_dbt_mart__jaffle_shop_analysis__products.is_drink_item}
-    description: 飲み物フラグ
+    description: 飲み物かどうかの真偽値
+    synonyms: [ drink_flag, 飲み物, ドリンク ]
 
-  is_food:
+  dim_is_food:
     # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
     sql: ${omni_dbt_mart__jaffle_shop_analysis__products.is_food_item}
-    description: 食べ物フラグ
+    description: 食べ物かどうかの真偽値
+    synonyms: [ food_flag, 食べ物, フード ]
+
+  dim_product_name:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: ${omni_dbt_mart__jaffle_shop_analysis__products.product_name}
+    description: '商品の具体的な名前（例: "nutellaphone who dis?"）'
+    synonyms: [ item_name, sku, 商品名, メニュー名 ]
+
+  dim_product_type:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: ${omni_dbt_mart__jaffle_shop_analysis__products.product_type}
+    description: "商品の分類（jaffle: サンドウィッチ, beverage: ドリンク）"
+    synonyms: [ category, genre, type, カテゴリ, 商品タイプ, ジャンル ]
 
 measures:
   count:

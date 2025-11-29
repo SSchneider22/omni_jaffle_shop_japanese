@@ -1,6 +1,6 @@
 # Reference this view as mart__jaffle_shop_analysis__order_items
 # View is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
-description: 注文明細テーブル（売上実績）
+description: 個々の商品購入ごとのトランザクション明細テーブル
 
 schema: MART
 folder: MART/jaffle_shop_analysis
@@ -38,46 +38,78 @@ dimensions:
   supply_cost:
     sql: '"SUPPLY_COST"'
 
-  order_date:
+  dim_date:
     # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
     sql: TO_DATE("PURCHASED_AT")
-    description: 注文日
+    description: 商品が購入された日付
+    synonyms: [ date, day, 日付, 販売日 ]
 
-  cost_amount:
+  dim_month:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: MONTH("PURCHASED_AT")
+    description: 購入された月（1-12）
+    synonyms: [ month, mo, 月 ]
+
+  dim_year:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: YEAR("PURCHASED_AT")
+    description: 購入された年
+    synonyms: [ year, yr, 年, 年度 ]
+
+  f_cost:
     # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
     sql: '"SUPPLY_COST"'
+    description: 商品の調達原価
 
-  gross_profit:
+  f_profit:
     # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
     sql: '"PRODUCT_PRICE" - "SUPPLY_COST"'
+    description: 商品単体での粗利益
 
-  sales_amount:
+  f_sales:
     # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
     sql: '"PRODUCT_PRICE"'
+    description: 値引き前の商品単価
 
 measures:
   count:
     aggregate_type: count
 
-  average_order_price:
+  m_aov:
     # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
-    sql: AVG("SALES_AMOUNT")
-    description: 平均商品単価
+    sql: SUM("F_SALES") / NULLIF(COUNT(DISTINCT "ORDER_ID"), 0)
+    description: 1回の注文あたりの平均売上金額
+    synonyms: [ average_order_value, sales_per_order, spend_per_customer, 客単価, 平均注文額 ]
 
-  total_items_sold:
+  m_items_sold:
     # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
     sql: COUNT("ORDER_ITEM_ID")
-    description: 総販売数量
+    description: 販売された商品の個数
+    synonyms: [ quantity, volume, units, count, 販売数, 個数, 数量 ]
 
-  total_profit:
+  m_order_count:
     # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
-    sql: SUM("GROSS_PROFIT")
-    description: 総粗利益
+    sql: COUNT(DISTINCT "ORDER_ID")
+    description: 決済が行われた回数（バスケット数）
+    synonyms: [ transactions_count, baskets, orders, 注文数, 客数, 決済回数 ]
 
-  total_revenue:
+  m_profit_margin:
     # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
-    sql: SUM("SALES_AMOUNT")
-    description: 総売上金額
+    sql: SUM("F_PROFIT") / NULLIF(SUM("F_SALES"), 0)
+    description: 売上に占める利益の割合（0～1.0）
+    synonyms: [ margin_rate, profitability, roi, 利益率, 粗利率 ]
+
+  m_total_profit:
+    # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: SUM("F_PROFIT")
+    description: 売上から原価を引いた粗利益の合計
+    synonyms: [ profit, gross_profit, earnings, margin, 利益, 粗利, 儲け ]
+
+  m_total_revenue:
+    # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: SUM("F_SALES")
+    description: 特定の期間やカテゴリにおける売上の合計金額
+    synonyms: [ sales, gross_sales, gtv, total_sales, amount, 売上, 総売上, 売上金額, 日商 ]
 
 #The info below was pulled from your dbt repository and is read-only.
 dbt:
