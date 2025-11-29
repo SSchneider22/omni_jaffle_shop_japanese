@@ -1,0 +1,157 @@
+# Reference this view as mart__jaffle_shop_analysis__order_items
+# View is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+description: 注文明細テーブル（売上実績）
+
+schema: MART
+folder: MART/jaffle_shop_analysis
+table_name: ORDER_ITEMS
+
+dimensions:
+  order_item_id:
+    sql: '"ORDER_ITEM_ID"'
+    format: ID
+    primary_key: true
+
+  order_id:
+    sql: '"ORDER_ID"'
+    format: ID
+
+  product_id:
+    sql: '"PRODUCT_ID"'
+    format: ID
+
+  purchased_at:
+    sql: '"PURCHASED_AT"'
+
+  product_name:
+    sql: '"PRODUCT_NAME"'
+
+  product_price:
+    sql: '"PRODUCT_PRICE"'
+
+  is_food_item:
+    sql: '"IS_FOOD_ITEM"'
+
+  is_drink_item:
+    sql: '"IS_DRINK_ITEM"'
+
+  supply_cost:
+    sql: '"SUPPLY_COST"'
+
+  order_date:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: TO_DATE("PURCHASED_AT")
+    description: 注文日
+
+  cost_amount:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: '"SUPPLY_COST"'
+
+  gross_profit:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: '"PRODUCT_PRICE" - "SUPPLY_COST"'
+
+  sales_amount:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: '"PRODUCT_PRICE"'
+
+measures:
+  count:
+    aggregate_type: count
+
+  average_order_price:
+    # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: AVG("SALES_AMOUNT")
+    description: 平均商品単価
+
+  total_items_sold:
+    # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: COUNT("ORDER_ITEM_ID")
+    description: 総販売数量
+
+  total_profit:
+    # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: SUM("GROSS_PROFIT")
+    description: 総粗利益
+
+  total_revenue:
+    # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: SUM("SALES_AMOUNT")
+    description: 総売上金額
+
+#The info below was pulled from your dbt repository and is read-only.
+dbt:
+  name: order_items
+  target_schema: PROD
+  config:
+    schema: mart
+    materialized: table
+  code: |-
+    with
+
+    order_items as (
+
+        select * from {{ ref('stg_order_items') }}
+
+    ),
+
+
+    orders as (
+
+        select * from {{ ref('stg_orders') }}
+
+    ),
+
+    products as (
+
+        select * from {{ ref('stg_products') }}
+
+    ),
+
+    supplies as (
+
+        select * from {{ ref('stg_supplies') }}
+
+    ),
+
+    order_supplies_summary as (
+
+        select
+            product_id,
+
+            sum(supply_cost) as supply_cost
+
+        from supplies
+
+        group by 1
+
+    ),
+
+    joined as (
+
+        select
+            order_items.*,
+
+            orders.purchased_at,
+            -- orders.ordered_at,
+
+            products.product_name,
+            products.product_price,
+            products.is_food_item,
+            products.is_drink_item,
+
+            order_supplies_summary.supply_cost
+
+        from order_items
+
+        left join orders on order_items.order_id = orders.order_id
+
+        left join products on order_items.product_id = products.product_id
+
+        left join order_supplies_summary
+            on order_items.product_id = order_supplies_summary.product_id
+
+    )
+
+    select * from joined
+  referenced_by: [ orders, product_total_sales ]

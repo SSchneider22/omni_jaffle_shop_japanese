@@ -1,0 +1,189 @@
+# Reference this view as mart__jaffle_shop_analysis_full__order_items
+# View is defined in the semantic view JAFFLE_SHOP_ANALYSIS_FULL in the data warehouse
+description: 個々の商品購入ごとのトランザクション明細テーブル
+
+schema: MART
+folder: MART/jaffle_shop_analysis_full
+table_name: ORDER_ITEMS
+
+dimensions:
+  order_item_id:
+    sql: '"ORDER_ITEM_ID"'
+    format: ID
+    primary_key: true
+
+  order_id:
+    sql: '"ORDER_ID"'
+    format: ID
+
+  product_id:
+    sql: '"PRODUCT_ID"'
+    format: ID
+
+  purchased_at:
+    sql: '"PURCHASED_AT"'
+
+  product_name:
+    sql: '"PRODUCT_NAME"'
+
+  product_price:
+    sql: '"PRODUCT_PRICE"'
+
+  is_food_item:
+    sql: '"IS_FOOD_ITEM"'
+
+  is_drink_item:
+    sql: '"IS_DRINK_ITEM"'
+
+  supply_cost:
+    sql: '"SUPPLY_COST"'
+
+  dim_date:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS_FULL in the data warehouse
+    sql: TO_DATE("PURCHASED_AT")
+    description: 商品が購入された日付
+    synonyms: [ date, day, 日付, 販売日 ]
+
+  dim_month:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS_FULL in the data warehouse
+    sql: MONTH("PURCHASED_AT")
+    description: 購入された月（1-12）
+    synonyms: [ month, mo, 月 ]
+
+  dim_year:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS_FULL in the data warehouse
+    sql: YEAR("PURCHASED_AT")
+    description: 購入された年
+    synonyms: [ year, yr, 年, 年度 ]
+
+  f_cost:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS_FULL in the data warehouse
+    sql: '"SUPPLY_COST"'
+    description: 商品の調達原価
+
+  f_profit:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS_FULL in the data warehouse
+    sql: '"PRODUCT_PRICE" - "SUPPLY_COST"'
+    description: 商品単体での粗利益
+
+  f_sales:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS_FULL in the data warehouse
+    sql: '"PRODUCT_PRICE"'
+    description: 値引き前の商品単価
+
+measures:
+  count:
+    aggregate_type: count
+
+  m_aov:
+    # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS_FULL in the data warehouse
+    sql: SUM("F_SALES") / NULLIF(COUNT(DISTINCT "ORDER_ID"), 0)
+    description: 1回の注文あたりの平均売上金額
+    synonyms: [ average_order_value, sales_per_order, spend_per_customer, 客単価, 平均注文額 ]
+
+  m_items_sold:
+    # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS_FULL in the data warehouse
+    sql: COUNT("ORDER_ITEM_ID")
+    description: 販売された商品の個数
+    synonyms: [ quantity, volume, units, count, 販売数, 個数, 数量 ]
+
+  m_order_count:
+    # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS_FULL in the data warehouse
+    sql: COUNT(DISTINCT "ORDER_ID")
+    description: 決済が行われた回数（バスケット数）
+    synonyms: [ transactions_count, baskets, orders, 注文数, 客数, 決済回数 ]
+
+  m_profit_margin:
+    # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS_FULL in the data warehouse
+    sql: SUM("F_PROFIT") / NULLIF(SUM("F_SALES"), 0)
+    description: 売上に占める利益の割合（0～1.0）
+    synonyms: [ margin_rate, profitability, roi, 利益率, 粗利率 ]
+
+  m_total_profit:
+    # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS_FULL in the data warehouse
+    sql: SUM("F_PROFIT")
+    description: 売上から原価を引いた粗利益の合計
+    synonyms: [ profit, gross_profit, earnings, margin, 利益, 粗利, 儲け ]
+
+  m_total_revenue:
+    # Measure is defined in the semantic view JAFFLE_SHOP_ANALYSIS_FULL in the data warehouse
+    sql: SUM("F_SALES")
+    description: 特定の期間やカテゴリにおける売上の合計金額
+    synonyms: [ sales, gross_sales, gtv, total_sales, amount, 売上, 総売上, 売上金額, 日商 ]
+
+#The info below was pulled from your dbt repository and is read-only.
+dbt:
+  name: order_items
+  target_schema: PROD
+  config:
+    schema: mart
+    materialized: table
+  code: |-
+    with
+
+    order_items as (
+
+        select * from {{ ref('stg_order_items') }}
+
+    ),
+
+
+    orders as (
+
+        select * from {{ ref('stg_orders') }}
+
+    ),
+
+    products as (
+
+        select * from {{ ref('stg_products') }}
+
+    ),
+
+    supplies as (
+
+        select * from {{ ref('stg_supplies') }}
+
+    ),
+
+    order_supplies_summary as (
+
+        select
+            product_id,
+
+            sum(supply_cost) as supply_cost
+
+        from supplies
+
+        group by 1
+
+    ),
+
+    joined as (
+
+        select
+            order_items.*,
+
+            orders.purchased_at,
+            -- orders.ordered_at,
+
+            products.product_name,
+            products.product_price,
+            products.is_food_item,
+            products.is_drink_item,
+
+            order_supplies_summary.supply_cost
+
+        from order_items
+
+        left join orders on order_items.order_id = orders.order_id
+
+        left join products on order_items.product_id = products.product_id
+
+        left join order_supplies_summary
+            on order_items.product_id = order_supplies_summary.product_id
+
+    )
+
+    select * from joined
+  referenced_by: [ orders, product_total_sales ]

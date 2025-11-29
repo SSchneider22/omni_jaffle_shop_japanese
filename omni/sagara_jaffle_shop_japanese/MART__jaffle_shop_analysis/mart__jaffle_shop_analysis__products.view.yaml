@@ -1,0 +1,67 @@
+# Reference this view as mart__jaffle_shop_analysis__products
+# View is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+description: 商品マスタテーブル
+
+schema: MART
+folder: MART/jaffle_shop_analysis
+table_name: PRODUCTS
+
+dimensions:
+  product_id:
+    sql: '"PRODUCT_ID"'
+    format: ID
+    primary_key: true
+
+  product_name:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: '"PRODUCT_NAME"'
+    description: 商品名
+
+  product_type:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: '"PRODUCT_TYPE"'
+    description: 商品カテゴリ (jaffle, beverageなど)
+
+  product_description:
+    sql: '"PRODUCT_DESCRIPTION"'
+
+  product_price:
+    sql: '"PRODUCT_PRICE"'
+
+  is_food_item:
+    sql: '"IS_FOOD_ITEM"'
+
+  is_drink_item:
+    sql: '"IS_DRINK_ITEM"'
+
+  is_drink:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: '"IS_DRINK_ITEM"'
+    description: 飲み物フラグ
+
+  is_food:
+    # Dimension is defined in the semantic view JAFFLE_SHOP_ANALYSIS in the data warehouse
+    sql: '"IS_FOOD_ITEM"'
+    description: 食べ物フラグ
+
+measures:
+  count:
+    aggregate_type: count
+
+#The info below was pulled from your dbt repository and is read-only.
+dbt:
+  name: products
+  target_schema: PROD
+  config:
+    schema: mart
+    materialized: table
+  code: |-
+    with
+
+    products as (
+
+        select * from {{ ref('stg_products') }}
+
+    )
+
+    select * from products
