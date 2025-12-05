@@ -96,6 +96,10 @@ measures:
       )
     label: Orders Count New Customer
 
+  tax_paid_cents_sum:
+    sql: ${omni_dbt_mart__orders.tax_paid_cents}
+    aggregate_type: sum
+
 #The info below was pulled from your dbt repository and is read-only.
 dbt:
   name: orders
