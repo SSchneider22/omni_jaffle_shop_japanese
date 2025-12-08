@@ -1,0 +1,5 @@
+# Reference this view as prod__orders
+measures:
+  count_drink_items_sum:
+    sql: ${prod__orders.count_drink_items}
+    aggregate_type: sum

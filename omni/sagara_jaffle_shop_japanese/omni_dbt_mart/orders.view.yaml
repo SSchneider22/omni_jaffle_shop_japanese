@@ -16,7 +16,6 @@ dimensions:
   location_id:
     sql: '"LOCATION_ID"'
     format: ID
-    description: 都市情報を管理するID
 
   customer_id:
     sql: '"CUSTOMER_ID"'
