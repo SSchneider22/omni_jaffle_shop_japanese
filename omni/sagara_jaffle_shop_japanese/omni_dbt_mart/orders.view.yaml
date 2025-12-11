@@ -101,6 +101,10 @@ measures:
     sql: ${omni_dbt_mart__orders.tax_paid_cents}
     aggregate_type: sum
 
+  tax_paid_sum:
+    sql: ${omni_dbt_mart__orders.tax_paid}
+    aggregate_type: sum
+
 #The info below was pulled from your dbt repository and is read-only.
 dbt:
   name: orders
